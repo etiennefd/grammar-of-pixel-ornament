@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bands — contact sheet</title>
+<style>
+  :root { --ink: #191713; --paper: #f8f2de; }
+
+  body {
+    margin: 0;
+    padding: 40px 32px 80px;
+    color: var(--ink);
+    font: 15px/1.4 "EB Garamond", Georgia, serif;
+    background-color: #cfd0cd;
+    background-image:
+      linear-gradient(rgba(25,23,19,0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(25,23,19,0.14) 1px, transparent 1px),
+      linear-gradient(rgba(25,23,19,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(25,23,19,0.05) 1px, transparent 1px);
+    background-size: 96px 96px, 96px 96px, 16px 16px, 16px 16px;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font: 700 15px/1 "Cinzel", Georgia, serif;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .lede { margin: 0 0 28px; font-style: italic; color: #4c4e4b; }
+
+  .controls {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px; padding: 10px 14px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    box-shadow: 3px 3px 0 rgba(25,23,19,0.25);
+    width: max-content;
+  }
+  .controls label { font-size: 13px; letter-spacing: 0.04em; }
+  output { font-variant-numeric: tabular-nums; }
+
+  .sheet { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    box-shadow: 3px 3px 0 rgba(25,23,19,0.25);
+    padding: 12px 14px 14px;
+    width: 320px;
+  }
+  .card h2 {
+    margin: 0; font: 700 13px/1 "Cinzel", Georgia, serif;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .meta { font-size: 13px; color: #8a8271; letter-spacing: 0.04em; margin: 3px 0 10px; }
+  .frieze { color: #ae1800; }
+
+  .strips { display: flex; gap: 12px; align-items: flex-start; }
+  .strip-h { flex: 1; min-width: 0; }
+  .strip-v { flex: none; }
+
+  .box-demo { margin-top: 44px; }
+  .box {
+    position: relative;
+    width: 356px; height: 320px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    box-shadow: 4px 4px 0 rgba(25,23,19,0.3);
+  }
+  .box .inner { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; }
+  .box .inner > div { padding: 14px; }
+  .box .title {
+    font: 700 15px/1.2 "Cinzel", Georgia, serif;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .box .caption { font-style: italic; color: #6b6455; }
+
+  .error {
+    background: #d4382a; color: #fff; padding: 12px 16px;
+    font-family: ui-monospace, monospace; font-size: 13px; white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+
+<h1>Bands — contact sheet</h1>
+<p class="lede">Every motif in <code>ornament.js</code>, tiled horizontally and rotated for a vertical edge.</p>
+
+<div class="controls">
+  <label for="scale">Ornament scale</label>
+  <input type="range" id="scale" min="2" max="6" step="1" value="3">
+  <output id="scaleOut">3</output>
+  <span class="meta" style="margin:0">px per cell</span>
+</div>
+
+<div id="sheet" class="sheet"></div>
+
+<div class="box-demo">
+  <h1>Assembled edges</h1>
+  <p class="lede">Four bands framing one box, via <code>edgeStyles()</code>.</p>
+  <div id="box" class="box"></div>
+</div>
+
+<script type="module">
+import { BANDS, PLATES, bandTexture, edgeStyles } from '../ornament.js';
+
+const sheet = document.getElementById('sheet');
+const slider = document.getElementById('scale');
+const scaleOut = document.getElementById('scaleOut');
+const boxEl = document.getElementById('box');
+
+/** A tiling strip for one band. `vertical` rotates it 90°, as a left/right edge. */
+function strip(name, vertical, scale, extent) {
+  const t = bandTexture(name, vertical);
+  const el = document.createElement('div');
+  Object.assign(el.style, {
+    backgroundImage: `url(${t.url})`,
+    backgroundSize: `${t.w * scale}px ${t.h * scale}px`,
+    backgroundRepeat: vertical ? 'repeat-y' : 'repeat-x',
+    imageRendering: 'pixelated',
+    outline: '1px solid rgba(25,23,19,0.35)'
+  });
+  if (vertical) {
+    el.style.width = t.w * scale + 'px';
+    el.style.height = extent + 'px';
+  } else {
+    el.style.height = t.h * scale + 'px';
+  }
+  return el;
+}
+
+function render() {
+  const scale = +slider.value;
+  scaleOut.value = scale;
+  sheet.textContent = '';
+
+  for (const [plateKey, plate] of Object.entries(PLATES)) {
+    for (const name of plate.bands) {
+      const band = BANDS[name];
+      const t = bandTexture(name);
+
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const h2 = document.createElement('h2');
+      h2.textContent = name;
+      card.appendChild(h2);
+
+      const meta = document.createElement('p');
+      meta.className = 'meta';
+      meta.innerHTML =
+        `${plate.label} · ${band.cite} · ${t.w}×${t.h} cells · ` +
+        `<span class="${band.weight === 'frieze' ? 'frieze' : ''}">${band.weight}</span>` +
+        (band.slimVariant ? ` → <em>${band.slimVariant}</em>` : '');
+      card.appendChild(meta);
+
+      const strips = document.createElement('div');
+      strips.className = 'strips';
+
+      const h = document.createElement('div');
+      h.className = 'strip-h';
+      h.appendChild(strip(name, false, scale));
+
+      const v = document.createElement('div');
+      v.className = 'strip-v';
+      v.appendChild(strip(name, true, scale, Math.max(64, t.h * scale)));
+
+      strips.append(h, v);
+      card.appendChild(strips);
+      sheet.appendChild(card);
+    }
+  }
+
+  // One box wearing four different bands, straight from edgeStyles().
+  const edges = { top: 'petals', bottom: 'checker', left: 'hatch', right: 'hatch' };
+  const s = edgeStyles(edges, scale);
+  boxEl.textContent = '';
+  for (const side of ['top', 'bottom', 'left', 'right']) {
+    const d = document.createElement('div');
+    Object.assign(d.style, s[side]);
+    boxEl.appendChild(d);
+  }
+  const inner = document.createElement('div');
+  inner.className = 'inner';
+  Object.assign(inner.style, s.padding);
+  inner.innerHTML =
+    '<div><div class="title">Historical Tech Tree</div>' +
+    '<div class="caption">historicaltechtree.com</div></div>';
+  boxEl.appendChild(inner);
+}
+
+slider.addEventListener('input', render);
+
+try {
+  render();
+} catch (err) {
+  document.body.insertAdjacentHTML('afterbegin',
+    `<div class="error">${err.stack || err.message}</div>`);
+  throw err;
+}
+</script>
+
+</body>
+</html>
