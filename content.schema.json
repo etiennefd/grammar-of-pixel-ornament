@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "etiennefd.com cabinet content",
+  "type": "object",
+  "required": ["meta", "boxes"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["grid", "ornamentScale"],
+      "properties": {
+        "grid": {
+          "type": "object",
+          "required": ["columns", "cellWidth", "rowHeight", "gap"],
+          "properties": {
+            "columns": { "type": "integer", "minimum": 2, "maximum": 12 },
+            "cellWidth": { "type": "integer", "description": "px per grid column" },
+            "rowHeight": { "type": "integer", "description": "px per grid row" },
+            "gap": { "type": "integer", "description": "px between boxes" }
+          }
+        },
+        "ornamentScale": {
+          "type": "integer", "minimum": 2, "maximum": 5,
+          "description": "screen px per ornament cell"
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "boxes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "x", "y", "w", "h", "title", "edges"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "kind": {
+            "enum": ["plate", "specimen", "ticket", "drawer"],
+            "description": "plate = 2x2 flagship with image; specimen = 2x1; ticket = 1x1 link; drawer = list of rows"
+          },
+          "x": { "type": "integer", "minimum": 0 },
+          "y": { "type": "integer", "minimum": 0 },
+          "w": { "type": "integer", "minimum": 1, "maximum": 6 },
+          "h": { "type": "integer", "minimum": 1, "maximum": 4 },
+          "nudge": {
+            "type": "object",
+            "description": "px offset from the grid slot, for deliberate asymmetry",
+            "properties": { "x": { "type": "integer" }, "y": { "type": "integer" } }
+          },
+          "title": { "type": "string" },
+          "caption": { "type": "string" },
+          "body": { "type": "string" },
+          "href": { "type": ["string", "null"] },
+          "image": { "type": ["string", "null"], "description": "path relative to site root" },
+          "edges": {
+            "type": "object",
+            "required": ["top", "bottom", "left", "right"],
+            "description": "band names; must be keys of BANDS in ornament.js",
+            "properties": {
+              "top": { "type": "string" },
+              "bottom": { "type": "string" },
+              "left": { "type": "string" },
+              "right": { "type": "string" }
+            }
+          },
+          "status": { "enum": ["current", "past"] },
+          "rows": {
+            "type": "array",
+            "description": "drawer only",
+            "items": {
+              "type": "object",
+              "required": ["title"],
+              "properties": {
+                "title": { "type": "string" },
+                "caption": { "type": "string" },
+                "href": { "type": ["string", "null"] }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
