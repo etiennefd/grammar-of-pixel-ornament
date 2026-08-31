@@ -76,3 +76,19 @@ Visible in the contact sheet, all for Étienne rather than for code:
   edition of the source book.
 - `reference/uploads/historical-tech-tree.png` — [historicaltechtree.com](https://historicaltechtree.com),
   the visual precedent for the buff ground, hairline boxes and hard corners.
+
+### The instinct behind the project
+
+Two posts from 17 August 2026, both captioned "websites should look like this":
+[@maxnc](https://x.com/maxnc/status/2089387121450627508) with an illuminated Book
+of Hours spread — miniature in an architectural frame, text block beside it, every
+margin packed with acanthus and heraldry — and
+[@_StevenFan](https://x.com/_StevenFan/status/2089454987260866636) quote-tweeting
+it with a painted Egyptian tomb corridor. Not the originals of the genre, just two
+recent instances of it.
+
+They name the thing this site is after. The Book of Hours is the frame model
+already in the brief: a hard rectangular content well, ornament living in the
+margin around it, a different treatment per edge. The tomb corridor is the source
+material itself — every band in `ornament.js` is traced from Plate VII, Egyptian
+No. 4, which is Owen Jones drawing exactly those walls.
